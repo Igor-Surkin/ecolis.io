@@ -35,25 +35,34 @@ function setLang(lang) {
   });
 }
 
+function getBasePath(currentPath, path) {
+  let base = currentPath;
+  if (currentPath.includes(`/ru/${path}`)) {
+    base = currentPath.replace(`/ru/${path}`, "/");
+  } else if (currentPath.includes(`/en/${path}`)) {
+    base = currentPath.replace(`/en/${path}`, "/");
+  } else if (currentPath.endsWith(path)) {
+    base = currentPath.slice(0, -path.length);
+  }
+  if (!base.endsWith("/")) {
+    base += "/";
+  }
+  return base;
+}
+
 function buildTargetUrl(lang, path) {
   if (!path) {
     return null;
   }
   if (window.location.protocol === "file:") {
     const currentPath = window.location.pathname.replace(/\\/g, "/");
-    let base = currentPath;
-    if (currentPath.includes(`/ru/${path}`)) {
-      base = currentPath.replace(`/ru/${path}`, "/");
-    } else if (currentPath.includes(`/en/${path}`)) {
-      base = currentPath.replace(`/en/${path}`, "/");
-    } else if (currentPath.endsWith(path)) {
-      base = currentPath.slice(0, -path.length);
-    }
+    const base = getBasePath(currentPath, path);
     const prefix = lang === "ru" ? "ru/" : lang === "en" ? "en/" : "";
     return `file://${base}${prefix}${path}`;
   }
-  const prefix = lang === "ru" ? "/ru/" : lang === "en" ? "/en/" : "/";
-  return `${window.location.origin}${prefix}${path}`;
+  const base = getBasePath(window.location.pathname, path);
+  const prefix = lang === "ru" ? "ru/" : lang === "en" ? "en/" : "";
+  return `${window.location.origin}${base}${prefix}${path}`;
 }
 
 if (menuToggle && nav) {
